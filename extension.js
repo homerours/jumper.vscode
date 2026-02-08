@@ -159,40 +159,31 @@ async function jumpToFile() {
  * Show quick pick for files in a directory
  */
 async function pickFileInDirectory(dirPath) {
-    try {
-        // Use glob pattern to find files recursively in the directory
-        const pattern = new vscode.RelativePattern(dirPath, '**/*');
-        const files = await vscode.workspace.findFiles(
-            pattern,
-            '**/node_modules/**', // exclude patterns
-            1000 // max results
-        );
+    const files = await vscode.workspace.findFiles(
+        new vscode.RelativePattern(dirPath, '**/*'),
+        '**/node_modules/**',
+        1000
+    );
 
-        if (files.length === 0) {
-            vscode.window.showInformationMessage(`No files found in ${dirPath}`);
-            return;
-        }
+    if (files.length === 0) {
+        vscode.window.showInformationMessage(`No files found in ${dirPath}`);
+        return;
+    }
 
-        const items = files.map(fileUri => {
-            const relativePath = path.relative(dirPath, fileUri.fsPath);
-            return {
-                label: path.basename(fileUri.fsPath),
-                description: relativePath,
-                fileUri: fileUri
-            };
-        });
+    const items = files.map(fileUri => ({
+        label: path.basename(fileUri.fsPath),
+        description: path.relative(dirPath, fileUri.fsPath),
+        fileUri: fileUri
+    }));
 
-        const selected = await vscode.window.showQuickPick(items, {
-            placeHolder: `Select a file in ${path.basename(dirPath)}`,
-            matchOnDescription: true
-        });
+    const selected = await vscode.window.showQuickPick(items, {
+        placeHolder: `Select a file in ${path.basename(dirPath)}`,
+        matchOnDescription: true
+    });
 
-        if (selected) {
-            const document = await vscode.workspace.openTextDocument(selected.fileUri);
-            await vscode.window.showTextDocument(document);
-        }
-    } catch (error) {
-        vscode.window.showErrorMessage(`Failed to read directory: ${error.message}`);
+    if (selected) {
+        const document = await vscode.workspace.openTextDocument(selected.fileUri);
+        await vscode.window.showTextDocument(document);
     }
 }
 
