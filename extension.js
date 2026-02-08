@@ -5,6 +5,12 @@ const path = require('path');
 
 const execAsync = promisify(exec);
 
+// Constants
+const WEIGHT_FILE_OPEN = 1.0;
+const WEIGHT_FILE_SAVE = 0.3;
+const MAX_FILES_IN_DIRECTORY = 1000;
+const EXCLUDE_PATTERNS = '**/node_modules/**';
+
 /**
  * Check if jumper is installed
  */
@@ -36,50 +42,34 @@ async function updateDatabase(pathToUpdate, weight) {
 }
 
 /**
- * Strip ANSI color codes from a string
- */
-function stripAnsiCodes(str) {
-    return str.replace(/\x1b\[[0-9;]*m/g, '');
-}
-
-/**
  * Build jumper command with configuration options
  */
 function buildJumperCommand(type, query = '') {
     const config = vscode.workspace.getConfiguration('jumper');
+    const args = ['jumper', 'find', `--type=${type}`];
 
-    let cmd = `jumper find --type=${type}`;
-
+    // Add max results
     const maxResults = config.get('maxResults');
     if (maxResults !== 'no_limit') {
-        cmd += ` -n ${maxResults}`;
+        args.push('-n', maxResults);
     }
 
-    // Never use -c flag (no color highlighting)
+    // Add flags based on configuration
+    if (config.get('homeTilde')) args.push('-H');
+    if (config.get('relative')) args.push('-r');
 
-    if (config.get('homeTilde')) {
-        cmd += ' -H';
-    }
+    // Add syntax
+    args.push(`--syntax=${config.get('syntax')}`);
 
-    if (config.get('relative')) {
-        cmd += ' -r';
-    }
-
-    const syntax = config.get('syntax');
-    cmd += ` --syntax=${syntax}`;
-
+    // Add case sensitivity
     const caseSensitivity = config.get('caseSensitivity');
-    if (caseSensitivity === 'sensitive') {
-        cmd += ' -S';
-    } else if (caseSensitivity === 'insensitive') {
-        cmd += ' -I';
-    }
+    if (caseSensitivity === 'sensitive') args.push('-S');
+    else if (caseSensitivity === 'insensitive') args.push('-I');
 
-    if (query) {
-        cmd += ` "${query}"`;
-    }
+    // Add query
+    if (query) args.push(`"${query}"`);
 
-    return cmd;
+    return args.join(' ');
 }
 
 /**
@@ -90,10 +80,9 @@ async function executeJumper(type, query = '') {
 
     try {
         const { stdout } = await execAsync(cmd);
-        const lines = stdout.trim().split('\n')
+        return stdout.trim().split('\n')
             .filter(line => line.length > 0)
-            .map(line => stripAnsiCodes(line.trim()));
-        return lines;
+            .map(line => line.trim());
     } catch (error) {
         console.error('Jumper command failed:', error);
         return [];
@@ -177,8 +166,8 @@ async function jumpToFile() {
 async function pickFileInDirectory(dirPath) {
     const files = await vscode.workspace.findFiles(
         new vscode.RelativePattern(dirPath, '**/*'),
-        '**/node_modules/**',
-        1000
+        EXCLUDE_PATTERNS,
+        MAX_FILES_IN_DIRECTORY
     );
 
     if (files.length === 0) {
@@ -241,7 +230,7 @@ function activate(context) {
     context.subscriptions.push(
         vscode.workspace.onDidOpenTextDocument(document => {
             if (document.uri.scheme === 'file') {
-                updateDatabase(document.fileName, 1.0);
+                updateDatabase(document.fileName, WEIGHT_FILE_OPEN);
             }
         })
     );
@@ -249,8 +238,8 @@ function activate(context) {
     // Track file saves
     context.subscriptions.push(
         vscode.workspace.onDidSaveTextDocument(document => {
-            if (document.uri.scheme === 'file' && document.isDirty === false) {
-                updateDatabase(document.fileName, 0.3);
+            if (document.uri.scheme === 'file' && !document.isDirty) {
+                updateDatabase(document.fileName, WEIGHT_FILE_SAVE);
             }
         })
     );
@@ -259,7 +248,7 @@ function activate(context) {
     context.subscriptions.push(
         vscode.workspace.onDidChangeWorkspaceFolders(event => {
             event.added.forEach(folder => {
-                updateDatabase(folder.uri.fsPath, 1.0);
+                updateDatabase(folder.uri.fsPath, WEIGHT_FILE_OPEN);
             });
         })
     );
@@ -268,7 +257,7 @@ function activate(context) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
         workspaceFolders.forEach(folder => {
-            updateDatabase(folder.uri.fsPath, 1.0);
+            updateDatabase(folder.uri.fsPath, WEIGHT_FILE_OPEN);
         });
     }
 }
