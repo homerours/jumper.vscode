@@ -1,13 +1,14 @@
 {
   "name": "jumper-vscode",
   "displayName": "Jumper for VSCode",
-  "description": "VSCode extension for jumper - quickly navigate to frequently used files and directories",
+  "description": "Fast file and directory navigation with frecency algorithm. Quick jump to frequently and recently used files or directories. Fuzzy finder with smart ranking.",
   "version": "0.1.0",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.75.0"
   },
   "categories": [
+    "Productivity",
     "Other"
   ],
   "activationEvents": [
@@ -91,9 +92,19 @@
   },
   "keywords": [
     "jumper",
+    "jump",
+    "z",
     "navigation",
     "frecency",
-    "fuzzy-finder"
+    "fuzzy-finder",
+    "file navigation",
+    "quick open",
+    "file finder",
+    "productivity",
+    "workspace",
+    "recent files",
+    "file search",
+    "quick switch"
   ],
   "author": "homerours",
   "license": "MIT"
