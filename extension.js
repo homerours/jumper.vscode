@@ -6,10 +6,49 @@ const path = require('path');
 const execAsync = promisify(exec);
 
 // Constants
-const WEIGHT_VISIT = 1.0;
-const WEIGHT_FILE_SAVE = 0.3;
 const MAX_FILES_IN_DIRECTORY = 1000;
 const EXCLUDE_PATTERNS = '**/node_modules/**';
+
+/**
+ * Get weight from configuration
+ */
+function getWeight(type) {
+    const config = vscode.workspace.getConfiguration('jumper.weights');
+    return config.get(type);
+}
+
+/**
+ * Debounce function - delays execution until after wait time has elapsed
+ */
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+/**
+ * Check if a file should be tracked in the jumper database
+ */
+function shouldTrackFile(filePath) {
+    if (!filePath) return false;
+
+    // Get exclude patterns from configuration
+    const config = vscode.workspace.getConfiguration('jumper');
+    const excludePatterns = config.get('excludePatterns', []);
+
+    // Always exclude files with colons (temporary buffers)
+    if (filePath.includes(':')) {
+        return false;
+    }
+
+    return !excludePatterns.some(pattern => filePath.includes(pattern));
+}
 
 /**
  * Check if jumper is installed
@@ -29,8 +68,8 @@ async function checkJumperInstalled() {
 async function updateDatabase(pathToUpdate, weight, type = 'files') {
     if (!pathToUpdate) return;
 
-    // Exclude git files and paths with colons (temporary buffers)
-    if (pathToUpdate.includes('/.git/') || pathToUpdate.includes(':')) {
+    // Check if file should be tracked (excludes temp files, build dirs, etc)
+    if (type === 'files' && !shouldTrackFile(pathToUpdate)) {
         return;
     }
 
@@ -197,7 +236,7 @@ async function pickFileInDirectory(dirPath) {
 async function jumpToDirectory() {
     await createJumperQuickPick('directories', 'Type to search directories (jumper query)', async (dirPath) => {
         const expandedPath = expandTilde(dirPath);
-        await updateDatabase(expandedPath, WEIGHT_VISIT, 'directories');
+        await updateDatabase(expandedPath, getWeight('visit'), 'directories');
         await pickFileInDirectory(expandedPath);
     });
 }
@@ -232,16 +271,37 @@ function activate(context) {
     context.subscriptions.push(
         vscode.workspace.onDidOpenTextDocument(document => {
             if (document.uri.scheme === 'file') {
-                updateDatabase(document.fileName, WEIGHT_VISIT);
+                updateDatabase(document.fileName, getWeight('visit'));
             }
         })
     );
 
-    // Track file saves
+    // Track file saves with different weights for manual vs auto save
     context.subscriptions.push(
-        vscode.workspace.onDidSaveTextDocument(document => {
-            if (document.uri.scheme === 'file' && !document.isDirty) {
-                updateDatabase(document.fileName, WEIGHT_FILE_SAVE);
+        vscode.workspace.onWillSaveTextDocument(event => {
+            if (event.document.uri.scheme === 'file') {
+                // TextDocumentSaveReason: Manual = 1, AfterDelay = 2, FocusOut = 3
+                const weight = event.reason === vscode.TextDocumentSaveReason.Manual
+                    ? getWeight('manualSave')
+                    : getWeight('autoSave');
+                updateDatabase(event.document.fileName, weight);
+            }
+        })
+    );
+
+    // Track active editor changes (switching between tabs)
+    // Debounced so rapid switching A -> B -> C -> D only tracks D
+    const config = vscode.workspace.getConfiguration('jumper');
+    const debounceDelay = config.get('debounceDelay', 500);
+
+    const debouncedEditorUpdate = debounce((fileName) => {
+        updateDatabase(fileName, getWeight('activeEditor'));
+    }, debounceDelay);
+
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            if (editor?.document.uri.scheme === 'file') {
+                debouncedEditorUpdate(editor.document.fileName);
             }
         })
     );
@@ -250,7 +310,7 @@ function activate(context) {
     context.subscriptions.push(
         vscode.workspace.onDidChangeWorkspaceFolders(event => {
             event.added.forEach(folder => {
-                updateDatabase(folder.uri.fsPath, WEIGHT_VISIT, 'directories');
+                updateDatabase(folder.uri.fsPath, getWeight('visit'), 'directories');
             });
         })
     );
@@ -259,7 +319,7 @@ function activate(context) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
         workspaceFolders.forEach(folder => {
-            updateDatabase(folder.uri.fsPath, WEIGHT_VISIT, 'directories');
+            updateDatabase(folder.uri.fsPath, getWeight('visit'), 'directories');
         });
     }
 }

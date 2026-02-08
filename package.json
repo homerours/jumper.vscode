@@ -78,6 +78,52 @@
           "type": "boolean",
           "default": false,
           "description": "Show relative paths"
+        },
+        "jumper.weights.visit": {
+          "type": "number",
+          "default": 1.0,
+          "description": "Weight for opening a file"
+        },
+        "jumper.weights.manualSave": {
+          "type": "number",
+          "default": 0.3,
+          "description": "Weight for manually saving a file (Ctrl/Cmd+S)"
+        },
+        "jumper.weights.autoSave": {
+          "type": "number",
+          "default": 0.05,
+          "description": "Weight for auto-saving a file"
+        },
+        "jumper.weights.activeEditor": {
+          "type": "number",
+          "default": 0.3,
+          "description": "Weight for switching to a file in the editor"
+        },
+        "jumper.excludePatterns": {
+          "type": "array",
+          "default": [
+            "/.git/",
+            "/node_modules/",
+            "/dist/",
+            "/build/",
+            "/out/",
+            "/.vscode/",
+            "/.idea/",
+            "/coverage/",
+            "/__pycache__/",
+            "/target/",
+            ".log",
+            ".tmp",
+            ".temp",
+            ".cache",
+            ".DS_Store"
+          ],
+          "description": "File path patterns to exclude from jumper tracking. Paths containing any of these patterns will not be tracked."
+        },
+        "jumper.debounceDelay": {
+          "type": "number",
+          "default": 500,
+          "description": "Delay in milliseconds before tracking active editor changes. When rapidly switching files, only the final file is tracked after this delay."
         }
       }
     }
