@@ -3,6 +3,7 @@
   "displayName": "Jumper",
   "description": "VSCode extension for jumper - quickly navigate to frequently used files and directories",
   "version": "0.1.0",
+  "icon": "icon.png",
   "engines": {
     "vscode": "^1.75.0"
   },
@@ -83,6 +84,7 @@
     "@types/node": "16.x",
     "eslint": "^8.0.0"
   },
+  "publisher": "homerours",
   "repository": {
     "type": "git",
     "url": "https://github.com/homerours/jumper.vscode"

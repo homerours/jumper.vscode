@@ -1,58 +1,129 @@
 # Jumper for VSCode
 
-A VSCode extension for [jumper](https://github.com/homerours/jumper) to quickly navigate to frequently used files and directories with very few keystrokes.
+Navigate to your most frequently and recently used files and directories instantly with [jumper](https://github.com/homerours/jumper)'s frecency algorithm.
+
+<!-- Add a demo GIF here:
+![Demo](demo.gif)
+-->
+
+## Why Jumper?
+
+- 🚀 **Lightning fast** - Jump to files in milliseconds using frecency ranking
+- 🧠 **Smart learning** - Automatically ranks files by frequency and recency
+- 🔄 **Consistent across editors** - Same frecency database as jumper CLI and Neovim plugin
+- 🎯 **Live updates** - Results update as you type, powered directly by jumper
+- ⚙️ **Highly configurable** - Customize ranking, syntax, and display options
+
+## Quick Start
+
+### 1. Install jumper CLI
+
+First, install the [jumper](https://github.com/homerours/jumper) command-line tool:
+
+**macOS/Linux:**
+```bash
+curl -fsSL https://raw.githubusercontent.com/homerours/jumper/main/install.sh | sh
+```
+
+**Or with cargo:**
+```bash
+cargo install jumper
+```
+
+See [jumper installation guide](https://github.com/homerours/jumper#installation) for more options.
+
+### 2. Install the extension
+
+Install from the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=homerours.jumper-vscode) or search for "Jumper" in the Extensions view.
+
+### 3. Start jumping!
+
+- Press `Ctrl+Alt+U` to jump to a file
+- Press `Ctrl+Alt+Y` to jump to a directory
+
+The extension automatically learns your file access patterns as you work.
 
 ## Features
 
-- **Automatic tracking**: Keeps jumper's database updated by tracking opened files, saved files, and workspace changes
-- **Quick navigation**: Jump to files and directories with live fuzzy matching powered by jumper's frecency algorithm
-- **No VSCode filtering**: Results come directly from jumper without additional filtering
-- **Configurable**: Customize ranking, syntax, and display options
+### Jump to Files (`Ctrl+Alt+U`)
+Search and open files from jumper's database with live query updates. Files you use most frequently and recently appear first.
 
-## Requirements
+### Jump to Directories (`Ctrl+Alt+Y`)
+Search for a directory, then browse and open files within it. Perfect for navigating large projects.
 
-You must have [jumper](https://github.com/homerours/jumper) installed on your system. Follow the [installation instructions](https://github.com/homerours/jumper#installation).
+### Automatic Tracking
+The extension automatically updates jumper's database:
+- When you open a file
+- When you save a file
+- When you change workspace folders
 
-## Usage
+### Live Query Updates
+Unlike standard VSCode file pickers, queries are sent directly to jumper as you type, with no additional VSCode filtering.
 
-### Commands
-
-- **Jumper: Jump to File** (`Ctrl+Alt+U`) - Search and open files from jumper's database with live query updates
-- **Jumper: Jump to Directory** (`Ctrl+Alt+Y`) - Search directories, then browse files within the selected directory
+## Customization
 
 ### Keybindings
 
-The extension provides default keybindings:
-- **`Ctrl+Alt+U`** - Jump to File
-- **`Ctrl+Alt+Y`** - Jump to Directory
+**Default shortcuts:**
+- `Ctrl+Alt+U` - Jump to File
+- `Ctrl+Alt+Y` - Jump to Directory
 
-#### Customizing Keybindings
+**To customize:**
+1. Open Keyboard Shortcuts: `Cmd+K Cmd+S` (Mac) or `Ctrl+K Ctrl+S` (Win/Linux)
+2. Search for "jumper"
+3. Click a command and press your desired key
 
-To change the default keybindings (e.g., to use `Ctrl+U` and `Ctrl+Y` like the Neovim plugin):
+**Tip:** If you use the [Neovim plugin](https://github.com/homerours/jumper.nvim), you can set `Ctrl+U` and `Ctrl+Y` for consistency.
 
-**Using the UI (recommended):**
+### Settings
 
-1. Open Keyboard Shortcuts: `Cmd+K Cmd+S` (macOS) or `Ctrl+K Ctrl+S` (Windows/Linux)
-2. Search for "jumper" to find the commands
-3. Click on a command and press your desired key combination
-4. If the key is already used, VSCode will warn you - you can choose to override it
+Configure jumper's behavior in VSCode settings:
 
-**Example: Setting Ctrl+U for Jump to File**
-1. Search for "Jumper: Jump to File"
-2. Click the pencil icon or the keybinding
-3. Press `Ctrl+U`
-4. Press Enter to confirm
-5. Repeat for "Jumper: Jump to Directory" with `Ctrl+Y`
+| Setting | Default | Description |
+|---------|---------|-------------|
+| `jumper.maxResults` | `300` | Maximum number of results to show |
+| `jumper.syntax` | `"extended"` | Query syntax: "extended" or "fuzzy" |
+| `jumper.caseSensitivity` | `"default"` | Case sensitivity: "default", "sensitive", or "insensitive" |
+| `jumper.homeTilde` | `true` | Show `~/path` instead of `/home/user/path` |
+| `jumper.relative` | `false` | Show relative paths instead of absolute |
+| `jumper.beta` | `1.0` | Ranking algorithm parameter |
 
-**Note**: Using `Ctrl+U` and `Ctrl+Y` will override VSCode's built-in shortcuts (scroll up and redo).
+## How It Works
 
-## Extension Settings
+Jumper uses a **frecency algorithm** (frequency + recency) to rank files and directories:
 
-This extension contributes the following settings:
+- Recently accessed items rank higher
+- Frequently accessed items rank higher
+- The ranking adapts to your workflow automatically
 
-- `jumper.maxResults`: Maximum number of results to show (default: 300)
-- `jumper.beta`: Beta parameter for ranking algorithm (default: 1.0)
-- `jumper.syntax`: Query syntax mode - "extended" or "fuzzy" (default: "extended")
-- `jumper.caseSensitivity`: Case sensitivity - "default", "sensitive", or "insensitive"
-- `jumper.homeTilde`: Substitute $HOME with ~/ in results (default: true)
-- `jumper.relative`: Show relative paths instead of absolute (default: false)
+The database is shared across:
+- Shell (jumper CLI)
+- Neovim ([jumper.nvim](https://github.com/homerours/jumper.nvim))
+- VSCode (this extension)
+
+## Troubleshooting
+
+### "jumper is not installed" error
+
+Install the jumper CLI tool following the [installation guide](https://github.com/homerours/jumper#installation).
+
+### No results showing
+
+The database builds over time as you use it. Try opening some files first, or use jumper in your shell to populate it faster.
+
+### Keybindings not working
+
+The default shortcuts may conflict with other extensions. Check Keyboard Shortcuts (`Cmd/Ctrl+K Cmd/Ctrl+S`) and customize as needed.
+
+## Related Projects
+
+- [jumper](https://github.com/homerours/jumper) - The core CLI tool
+- [jumper.nvim](https://github.com/homerours/jumper.nvim) - Neovim plugin
+
+## Credits
+
+Created by [homerours](https://github.com/homerours). Inspired by [z](https://github.com/rupa/z) and other frecency tools.
+
+## License
+
+MIT
