@@ -1,0 +1,98 @@
+{
+  "name": "jumper-vscode",
+  "displayName": "Jumper",
+  "description": "VSCode extension for jumper - quickly navigate to frequently used files and directories",
+  "version": "0.1.0",
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "jumper.jumpToFile",
+        "title": "Jumper: Jump to File"
+      },
+      {
+        "command": "jumper.jumpToDirectory",
+        "title": "Jumper: Jump to Directory"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "jumper.jumpToFile",
+        "key": "ctrl+alt+u",
+        "mac": "ctrl+alt+u"
+      },
+      {
+        "command": "jumper.jumpToDirectory",
+        "key": "ctrl+alt+y",
+        "mac": "ctrl+alt+y"
+      }
+    ],
+    "configuration": {
+      "title": "Jumper",
+      "properties": {
+        "jumper.maxResults": {
+          "type": "number",
+          "default": 300,
+          "description": "Maximum number of results to show"
+        },
+        "jumper.beta": {
+          "type": "number",
+          "default": 1.0,
+          "description": "Beta parameter for ranking algorithm"
+        },
+        "jumper.syntax": {
+          "type": "string",
+          "default": "extended",
+          "enum": ["extended", "fuzzy"],
+          "description": "Query syntax mode"
+        },
+        "jumper.caseSensitivity": {
+          "type": "string",
+          "default": "default",
+          "enum": ["default", "sensitive", "insensitive"],
+          "description": "Case sensitivity for queries"
+        },
+        "jumper.homeTilde": {
+          "type": "boolean",
+          "default": true,
+          "description": "Substitute $HOME with ~/ in results"
+        },
+        "jumper.relative": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show relative paths"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "pretest": "npm run lint"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.75.0",
+    "@types/node": "16.x",
+    "eslint": "^8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/homerours/jumper.vscode"
+  },
+  "keywords": [
+    "jumper",
+    "navigation",
+    "frecency",
+    "fuzzy-finder"
+  ],
+  "author": "homerours",
+  "license": "MIT"
+}
