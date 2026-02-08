@@ -11,7 +11,6 @@ Navigate to your most frequently and recently used files and directories instant
 - 🚀 **Lightning fast** - Jump to files in milliseconds using frecency ranking
 - 🧠 **Smart learning** - Automatically ranks files by frequency and recency
 - 🔄 **Consistent across editors** - Same frecency database as jumper CLI and Neovim plugin
-- 🎯 **Live updates** - Results update as you type, powered directly by jumper
 - ⚙️ **Highly configurable** - Customize ranking, syntax, and display options
 
 ## Quick Start
@@ -20,15 +19,37 @@ Navigate to your most frequently and recently used files and directories instant
 
 First, install the [jumper](https://github.com/homerours/jumper) command-line tool:
 
-**macOS/Linux:**
+- macOS:
 ```bash
-curl -fsSL https://raw.githubusercontent.com/homerours/jumper/main/install.sh | sh
+brew install homerours/tap/jumper
+```
+- archlinux: an [AUR package](https://aur.archlinux.org/packages/jumper) is available:
+```bash
+yay -S jumper
+```
+- other OS: you can either download pre-built packages on the [Releases](https://github.com/homerours/jumper/releases) page, or follow the instructions below to install from source.
+
+Then, set up your shell following [these instructions](https://github.com/homerours/jumper#shell).
+
+#### Install from source
+A C compiler is needed to install from source. The makefile uses `gcc`.
+
+##### Install script
+
+You can use the install script to clone and compile jumper + set up the shell keybindings automatically:
+```sh
+PREFIX=$HOME/.local/bin sh -c "$(curl -s https://raw.githubusercontent.com/homerours/jumper/master/install.sh)"
 ```
 
-**Or with cargo:**
-```bash
-cargo install jumper
+##### Manual installation
+
+Alternatively, you can run
+```sh
+git clone https://github.com/homerours/jumper
+cd jumper
+make install
 ```
+to compile and move the `jumper` binary to `/usr/local/bin`. You then have to setup your shell as follows.
 
 See [jumper installation guide](https://github.com/homerours/jumper#installation) for more options.
 
@@ -119,6 +140,7 @@ The default shortcuts may conflict with other extensions. Check Keyboard Shortcu
 
 - [jumper](https://github.com/homerours/jumper) - The core CLI tool
 - [jumper.nvim](https://github.com/homerours/jumper.nvim) - Neovim plugin
+- [jumper.vim](https://github.com/homerours/jumper.vim) - Vim plugin
 
 ## Credits
 
