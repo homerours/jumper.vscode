@@ -1,6 +1,6 @@
 {
   "name": "jumper-vscode",
-  "displayName": "Jumper",
+  "displayName": "Jumper for VSCode",
   "description": "VSCode extension for jumper - quickly navigate to frequently used files and directories",
   "version": "0.1.0",
   "icon": "icon.png",

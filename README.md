@@ -55,7 +55,25 @@ See [jumper installation guide](https://github.com/homerours/jumper#installation
 
 ### 2. Install the extension
 
-Install from the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=homerours.jumper-vscode) or search for "Jumper" in the Extensions view.
+**From the marketplace:**
+
+Install from the [VSCode Marketplace](https://marketplace.visualstudio.com/items?itemName=homerours.jumper-vscode) or search for "Jumper for VSCode" in the Extensions view.
+
+**Manual installation (advanced):**
+
+If you want to install a specific version or test unreleased versions:
+
+1. Download the `.vsix` file from [GitHub Releases](https://github.com/homerours/jumper.vscode/releases)
+
+2. Install via command line:
+   ```bash
+   code --install-extension jumper-vscode-VERSION.vsix
+   ```
+
+3. Or install via VSCode UI:
+   - Press `Cmd+Shift+X` (Mac) or `Ctrl+Shift+X` (Win/Linux)
+   - Click the `...` menu → **"Install from VSIX..."**
+   - Select the downloaded `.vsix` file
 
 ### 3. Start jumping!
 
