@@ -113,16 +113,11 @@ async function jumpToFile() {
         const results = await executeJumper('files', query);
 
         quickPick.items = results.map(filePath => {
-            // Expand ~ to home directory if needed
-            const expandedPath = filePath.startsWith('~')
-                ? filePath.replace('~', process.env.HOME || process.env.USERPROFILE)
-                : filePath;
-
             return {
-                label: path.basename(expandedPath),
-                description: expandedPath,
-                filePath: expandedPath,
-                alwaysShow: true  // Prevent VSCode from filtering
+                label: path.basename(filePath),
+                description: filePath,  // Keep ~ in display
+                filePath: filePath,     // Keep original path
+                alwaysShow: true
             };
         });
         quickPick.busy = false;
@@ -142,7 +137,11 @@ async function jumpToFile() {
         if (selected && selected.filePath) {
             quickPick.hide();
             try {
-                const uri = vscode.Uri.file(selected.filePath);
+                // Expand ~ only when opening the file
+                const expandedPath = selected.filePath.startsWith('~')
+                    ? selected.filePath.replace('~', process.env.HOME || process.env.USERPROFILE)
+                    : selected.filePath;
+                const uri = vscode.Uri.file(expandedPath);
                 const document = await vscode.workspace.openTextDocument(uri);
                 await vscode.window.showTextDocument(document);
             } catch (error) {
@@ -200,16 +199,11 @@ async function jumpToDirectory() {
         const results = await executeJumper('directories', query);
 
         quickPick.items = results.map(dirPath => {
-            // Expand ~ to home directory if needed
-            const expandedPath = dirPath.startsWith('~')
-                ? dirPath.replace('~', process.env.HOME || process.env.USERPROFILE)
-                : dirPath;
-
             return {
-                label: path.basename(expandedPath),
-                description: expandedPath,
-                dirPath: expandedPath,
-                alwaysShow: true  // Prevent VSCode from filtering
+                label: path.basename(dirPath),
+                description: dirPath,  // Keep ~ in display
+                dirPath: dirPath,      // Keep original path
+                alwaysShow: true
             };
         });
         quickPick.busy = false;
@@ -228,8 +222,11 @@ async function jumpToDirectory() {
         const selected = quickPick.selectedItems[0];
         if (selected && selected.dirPath) {
             quickPick.hide();
-            // Show file picker in the selected directory
-            await pickFileInDirectory(selected.dirPath);
+            // Expand ~ when opening directory
+            const expandedPath = selected.dirPath.startsWith('~')
+                ? selected.dirPath.replace('~', process.env.HOME || process.env.USERPROFILE)
+                : selected.dirPath;
+            await pickFileInDirectory(expandedPath);
         }
     });
 
