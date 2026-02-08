@@ -5,8 +5,8 @@ A VSCode extension for [jumper](https://github.com/homerours/jumper) to quickly 
 ## Features
 
 - **Automatic tracking**: Keeps jumper's database updated by tracking opened files, saved files, and workspace changes
-- **Quick navigation**: Jump to files and directories with fuzzy matching
-- **Find in files**: Search within files from jumper's database
+- **Quick navigation**: Jump to files and directories with live fuzzy matching powered by jumper's frecency algorithm
+- **No VSCode filtering**: Results come directly from jumper without additional filtering
 - **Configurable**: Customize ranking, syntax, and display options
 
 ## Requirements
@@ -17,28 +17,34 @@ You must have [jumper](https://github.com/homerours/jumper) installed on your sy
 
 ### Commands
 
-- **Jumper: Jump to File** - Open a quick pick to select and open a file from jumper's database
-- **Jumper: Jump to Directory** - Open a quick pick to select and open a directory
-- **Jumper: Find in Files** - Search within files from jumper's database
+- **Jumper: Jump to File** (`Ctrl+Alt+U`) - Search and open files from jumper's database with live query updates
+- **Jumper: Jump to Directory** (`Ctrl+Alt+Y`) - Search directories, then browse files within the selected directory
 
-### Recommended Keybindings
+### Keybindings
 
-Add these to your `keybindings.json`:
+The extension provides default keybindings:
+- **`Ctrl+Alt+U`** - Jump to File
+- **`Ctrl+Alt+Y`** - Jump to Directory
 
-```json
-{
-  "key": "ctrl+u",
-  "command": "jumper.jumpToFile"
-},
-{
-  "key": "ctrl+y",
-  "command": "jumper.jumpToDirectory"
-},
-{
-  "key": "ctrl+shift+f",
-  "command": "jumper.findInFiles"
-}
-```
+#### Customizing Keybindings
+
+To change the default keybindings (e.g., to use `Ctrl+U` and `Ctrl+Y` like the Neovim plugin):
+
+**Using the UI (recommended):**
+
+1. Open Keyboard Shortcuts: `Cmd+K Cmd+S` (macOS) or `Ctrl+K Ctrl+S` (Windows/Linux)
+2. Search for "jumper" to find the commands
+3. Click on a command and press your desired key combination
+4. If the key is already used, VSCode will warn you - you can choose to override it
+
+**Example: Setting Ctrl+U for Jump to File**
+1. Search for "Jumper: Jump to File"
+2. Click the pencil icon or the keybinding
+3. Press `Ctrl+U`
+4. Press Enter to confirm
+5. Repeat for "Jumper: Jump to Directory" with `Ctrl+Y`
+
+**Note**: Using `Ctrl+U` and `Ctrl+Y` will override VSCode's built-in shortcuts (scroll up and redo).
 
 ## Extension Settings
 
@@ -50,30 +56,3 @@ This extension contributes the following settings:
 - `jumper.caseSensitivity`: Case sensitivity - "default", "sensitive", or "insensitive"
 - `jumper.homeTilde`: Substitute $HOME with ~/ in results (default: true)
 - `jumper.relative`: Show relative paths instead of absolute (default: false)
-
-## How it Works
-
-The extension automatically updates jumper's database when you:
-- Open a file (weight: 1.0)
-- Save a file (weight: 0.3)
-- Change workspace folders (weight: 1.0)
-
-This ensures that your most frequently and recently used files and directories are always available for quick access.
-
-## Development
-
-To run the extension in development mode:
-
-1. Clone the repository
-2. Open in VSCode
-3. Press F5 to launch Extension Development Host
-4. Test the commands in the new window
-
-## Credits
-
-- Based on [jumper](https://github.com/homerours/jumper) by homerours
-- Inspired by [jumper.nvim](https://github.com/homerours/jumper.nvim)
-
-## License
-
-MIT
