@@ -6,7 +6,7 @@ const path = require('path');
 const execAsync = promisify(exec);
 
 // Constants
-const WEIGHT_FILE_OPEN = 1.0;
+const WEIGHT_VISIT = 1.0;
 const WEIGHT_FILE_SAVE = 0.3;
 const MAX_FILES_IN_DIRECTORY = 1000;
 const EXCLUDE_PATTERNS = '**/node_modules/**';
@@ -26,7 +26,7 @@ async function checkJumperInstalled() {
 /**
  * Update jumper database with a file or directory
  */
-async function updateDatabase(pathToUpdate, weight) {
+async function updateDatabase(pathToUpdate, weight, type = 'files') {
     if (!pathToUpdate) return;
 
     // Exclude git files and paths with colons (temporary buffers)
@@ -35,7 +35,7 @@ async function updateDatabase(pathToUpdate, weight) {
     }
 
     try {
-        await execAsync(`jumper update --type=files -w ${weight} "${pathToUpdate}"`);
+        await execAsync(`jumper update --type=${type} -w ${weight} "${pathToUpdate}"`);
     } catch (error) {
         // Silently fail - don't spam console with update errors
     }
@@ -196,7 +196,9 @@ async function pickFileInDirectory(dirPath) {
  */
 async function jumpToDirectory() {
     await createJumperQuickPick('directories', 'Type to search directories (jumper query)', async (dirPath) => {
-        await pickFileInDirectory(expandTilde(dirPath));
+        const expandedPath = expandTilde(dirPath);
+        await updateDatabase(expandedPath, WEIGHT_VISIT, 'directories');
+        await pickFileInDirectory(expandedPath);
     });
 }
 
@@ -230,7 +232,7 @@ function activate(context) {
     context.subscriptions.push(
         vscode.workspace.onDidOpenTextDocument(document => {
             if (document.uri.scheme === 'file') {
-                updateDatabase(document.fileName, WEIGHT_FILE_OPEN);
+                updateDatabase(document.fileName, WEIGHT_VISIT);
             }
         })
     );
@@ -248,7 +250,7 @@ function activate(context) {
     context.subscriptions.push(
         vscode.workspace.onDidChangeWorkspaceFolders(event => {
             event.added.forEach(folder => {
-                updateDatabase(folder.uri.fsPath, WEIGHT_FILE_OPEN);
+                updateDatabase(folder.uri.fsPath, WEIGHT_VISIT, 'directories');
             });
         })
     );
@@ -257,7 +259,7 @@ function activate(context) {
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
         workspaceFolders.forEach(folder => {
-            updateDatabase(folder.uri.fsPath, WEIGHT_FILE_OPEN);
+            updateDatabase(folder.uri.fsPath, WEIGHT_VISIT, 'directories');
         });
     }
 }
