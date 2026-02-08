@@ -101,57 +101,74 @@ async function executeJumper(type, query = '') {
 }
 
 /**
- * Show quick pick for files with live jumper queries
+ * Expand ~ to home directory if present
  */
-async function jumpToFile() {
-    const quickPick = vscode.window.createQuickPick();
-    quickPick.placeholder = 'Type to search files (jumper query)';
+function expandTilde(filePath) {
+    return filePath.startsWith('~')
+        ? filePath.replace('~', process.env.HOME || process.env.USERPROFILE)
+        : filePath;
+}
 
-    // Function to update results based on query
+/**
+ * Open a file in a new tab
+ */
+async function openFileInNewTab(fileUri) {
+    const document = await vscode.workspace.openTextDocument(fileUri);
+    await vscode.window.showTextDocument(document, {
+        preview: false,
+        preserveFocus: false
+    });
+}
+
+/**
+ * Generic quick pick for jumper queries
+ */
+async function createJumperQuickPick(type, placeholder, onSelect) {
+    const quickPick = vscode.window.createQuickPick();
+    quickPick.placeholder = placeholder;
+
     const updateResults = async (query) => {
         quickPick.busy = true;
-        const results = await executeJumper('files', query);
+        const results = await executeJumper(type, query);
 
-        quickPick.items = results.map(filePath => {
-            return {
-                label: path.basename(filePath),
-                description: filePath,  // Keep ~ in display
-                filePath: filePath,     // Keep original path
-                alwaysShow: true
-            };
-        });
+        quickPick.items = results.map(itemPath => ({
+            label: path.basename(itemPath),
+            description: itemPath,  // Keep ~ in display
+            path: itemPath,         // Store original path
+            alwaysShow: true
+        }));
         quickPick.busy = false;
     };
 
-    // Load initial results
     await updateResults('');
 
-    // Update results as user types
     quickPick.onDidChangeValue(async (value) => {
         await updateResults(value);
     });
 
-    // Handle selection
     quickPick.onDidAccept(async () => {
         const selected = quickPick.selectedItems[0];
-        if (selected && selected.filePath) {
+        if (selected && selected.path) {
             quickPick.hide();
-            try {
-                // Expand ~ only when opening the file
-                const expandedPath = selected.filePath.startsWith('~')
-                    ? selected.filePath.replace('~', process.env.HOME || process.env.USERPROFILE)
-                    : selected.filePath;
-                const uri = vscode.Uri.file(expandedPath);
-                const document = await vscode.workspace.openTextDocument(uri);
-                await vscode.window.showTextDocument(document);
-            } catch (error) {
-                vscode.window.showErrorMessage(`Failed to open file: ${error.message}`);
-            }
+            await onSelect(selected.path);
         }
     });
 
     quickPick.onDidHide(() => quickPick.dispose());
     quickPick.show();
+}
+
+/**
+ * Show quick pick for files with live jumper queries
+ */
+async function jumpToFile() {
+    await createJumperQuickPick('files', 'Type to search files (jumper query)', async (filePath) => {
+        try {
+            await openFileInNewTab(vscode.Uri.file(expandTilde(filePath)));
+        } catch (error) {
+            vscode.window.showErrorMessage(`Failed to open file: ${error.message}`);
+        }
+    });
 }
 
 /**
@@ -181,8 +198,7 @@ async function pickFileInDirectory(dirPath) {
     });
 
     if (selected) {
-        const document = await vscode.workspace.openTextDocument(selected.fileUri);
-        await vscode.window.showTextDocument(document);
+        await openFileInNewTab(selected.fileUri);
     }
 }
 
@@ -190,48 +206,9 @@ async function pickFileInDirectory(dirPath) {
  * Show quick pick for directories with live jumper queries
  */
 async function jumpToDirectory() {
-    const quickPick = vscode.window.createQuickPick();
-    quickPick.placeholder = 'Type to search directories (jumper query)';
-
-    // Function to update results based on query
-    const updateResults = async (query) => {
-        quickPick.busy = true;
-        const results = await executeJumper('directories', query);
-
-        quickPick.items = results.map(dirPath => {
-            return {
-                label: path.basename(dirPath),
-                description: dirPath,  // Keep ~ in display
-                dirPath: dirPath,      // Keep original path
-                alwaysShow: true
-            };
-        });
-        quickPick.busy = false;
-    };
-
-    // Load initial results
-    await updateResults('');
-
-    // Update results as user types
-    quickPick.onDidChangeValue(async (value) => {
-        await updateResults(value);
+    await createJumperQuickPick('directories', 'Type to search directories (jumper query)', async (dirPath) => {
+        await pickFileInDirectory(expandTilde(dirPath));
     });
-
-    // Handle selection
-    quickPick.onDidAccept(async () => {
-        const selected = quickPick.selectedItems[0];
-        if (selected && selected.dirPath) {
-            quickPick.hide();
-            // Expand ~ when opening directory
-            const expandedPath = selected.dirPath.startsWith('~')
-                ? selected.dirPath.replace('~', process.env.HOME || process.env.USERPROFILE)
-                : selected.dirPath;
-            await pickFileInDirectory(expandedPath);
-        }
-    });
-
-    quickPick.onDidHide(() => quickPick.dispose());
-    quickPick.show();
 }
 
 
