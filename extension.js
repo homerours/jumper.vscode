@@ -141,11 +141,18 @@ function expandTilde(filePath) {
  * Open a file in a new tab
  */
 async function openFileInNewTab(fileUri) {
-    const document = await vscode.workspace.openTextDocument(fileUri);
-    await vscode.window.showTextDocument(document, {
-        preview: false,
-        preserveFocus: false
-    });
+    // Check if it's a notebook file
+    if (fileUri.fsPath.endsWith('.ipynb')) {
+        // Open as notebook
+        await vscode.commands.executeCommand('vscode.open', fileUri);
+    } else {
+        // Open as regular text document
+        const document = await vscode.workspace.openTextDocument(fileUri);
+        await vscode.window.showTextDocument(document, {
+            preview: false,
+            preserveFocus: false
+        });
+    }
 }
 
 /**
@@ -243,6 +250,36 @@ async function jumpToDirectory() {
 
 
 /**
+ * Helper to track file/notebook opens
+ */
+function trackOpen(uri) {
+    if (uri.scheme === 'file') {
+        updateDatabase(uri.fsPath, getWeight('visit'));
+    }
+}
+
+/**
+ * Helper to track file/notebook saves with reason
+ */
+function trackSave(uri, reason) {
+    if (uri.scheme === 'file') {
+        const weight = reason === vscode.TextDocumentSaveReason.Manual
+            ? getWeight('manualSave')
+            : getWeight('autoSave');
+        updateDatabase(uri.fsPath, weight);
+    }
+}
+
+/**
+ * Helper to create debounced active editor tracker
+ */
+function createActiveEditorTracker(debounceDelay) {
+    return debounce((filePath) => {
+        updateDatabase(filePath, getWeight('activeEditor'));
+    }, debounceDelay);
+}
+
+/**
  * Activate the extension
  */
 function activate(context) {
@@ -267,41 +304,49 @@ function activate(context) {
         vscode.commands.registerCommand('jumper.jumpToDirectory', jumpToDirectory)
     );
 
+    // Get debounce delay configuration
+    const config = vscode.workspace.getConfiguration('jumper');
+    const debounceDelay = config.get('debounceDelay', 500);
+    const debouncedActiveEditorUpdate = createActiveEditorTracker(debounceDelay);
+
     // Track file opens
     context.subscriptions.push(
-        vscode.workspace.onDidOpenTextDocument(document => {
-            if (document.uri.scheme === 'file') {
-                updateDatabase(document.fileName, getWeight('visit'));
-            }
-        })
+        vscode.workspace.onDidOpenTextDocument(document => trackOpen(document.uri))
+    );
+
+    // Track notebook opens
+    context.subscriptions.push(
+        vscode.workspace.onDidOpenNotebookDocument(notebook => trackOpen(notebook.uri))
     );
 
     // Track file saves with different weights for manual vs auto save
     context.subscriptions.push(
-        vscode.workspace.onWillSaveTextDocument(event => {
-            if (event.document.uri.scheme === 'file') {
-                // TextDocumentSaveReason: Manual = 1, AfterDelay = 2, FocusOut = 3
-                const weight = event.reason === vscode.TextDocumentSaveReason.Manual
-                    ? getWeight('manualSave')
-                    : getWeight('autoSave');
-                updateDatabase(event.document.fileName, weight);
+        vscode.workspace.onWillSaveTextDocument(event =>
+            trackSave(event.document.uri, event.reason)
+        )
+    );
+
+    // Track notebook saves with different weights for manual vs auto save
+    context.subscriptions.push(
+        vscode.workspace.onWillSaveNotebookDocument(event =>
+            trackSave(event.notebook.uri, event.reason)
+        )
+    );
+
+    // Track active editor changes (switching between text document tabs)
+    context.subscriptions.push(
+        vscode.window.onDidChangeActiveTextEditor(editor => {
+            if (editor?.document.uri.scheme === 'file') {
+                debouncedActiveEditorUpdate(editor.document.uri.fsPath);
             }
         })
     );
 
-    // Track active editor changes (switching between tabs)
-    // Debounced so rapid switching A -> B -> C -> D only tracks D
-    const config = vscode.workspace.getConfiguration('jumper');
-    const debounceDelay = config.get('debounceDelay', 500);
-
-    const debouncedEditorUpdate = debounce((fileName) => {
-        updateDatabase(fileName, getWeight('activeEditor'));
-    }, debounceDelay);
-
+    // Track active notebook editor changes (switching between notebook tabs)
     context.subscriptions.push(
-        vscode.window.onDidChangeActiveTextEditor(editor => {
-            if (editor?.document.uri.scheme === 'file') {
-                debouncedEditorUpdate(editor.document.fileName);
+        vscode.window.onDidChangeActiveNotebookEditor(editor => {
+            if (editor?.notebook.uri.scheme === 'file') {
+                debouncedActiveEditorUpdate(editor.notebook.uri.fsPath);
             }
         })
     );
