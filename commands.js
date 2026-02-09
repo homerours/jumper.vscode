@@ -40,6 +40,11 @@ async function createJumperQuickPick(type, placeholder, onSelect) {
     const quickPick = vscode.window.createQuickPick();
     quickPick.placeholder = placeholder;
 
+    // Disable VSCode's built-in filtering and sorting to preserve jumper's ranking
+    quickPick.matchOnDescription = false;
+    quickPick.matchOnDetail = false;
+    quickPick.sortByLabel = false;
+
     const updateResults = async (query) => {
         quickPick.busy = true;
         const results = await executeJumper(type, query);
