@@ -19,6 +19,9 @@ function expandTilde(filePath) {
  * Open a file in a new tab
  */
 async function openFileInNewTab(fileUri) {
+    const config = vscode.workspace.getConfiguration('jumper');
+    const openInNewTab = config.get('openInNewTab', true);
+
     // Check if it's a notebook file
     if (fileUri.fsPath.endsWith('.ipynb')) {
         // Open as notebook
@@ -27,7 +30,7 @@ async function openFileInNewTab(fileUri) {
         // Open as regular text document
         const document = await vscode.workspace.openTextDocument(fileUri);
         await vscode.window.showTextDocument(document, {
-            preview: false,
+            preview: !openInNewTab,  // If openInNewTab is false, use preview mode
             preserveFocus: false
         });
     }
@@ -44,6 +47,10 @@ async function createJumperQuickPick(type, placeholder, onSelect) {
     quickPick.matchOnDescription = false;
     quickPick.matchOnDetail = false;
     quickPick.sortByLabel = false;
+
+    // Check if preview on selection is enabled
+    const config = vscode.workspace.getConfiguration('jumper');
+    const previewEnabled = config.get('previewOnSelection', false);
 
     const updateResults = async (query) => {
         quickPick.busy = true;
@@ -63,6 +70,34 @@ async function createJumperQuickPick(type, placeholder, onSelect) {
     quickPick.onDidChangeValue(async (value) => {
         await updateResults(value);
     });
+
+    // Preview file when navigating through results (arrow keys) if enabled
+    if (previewEnabled) {
+        quickPick.onDidChangeActive(async (items) => {
+            const activeItem = items[0];
+            if (activeItem?.path) {
+                try {
+                    const uri = vscode.Uri.file(expandTilde(activeItem.path));
+
+                    // Check if it's a notebook
+                    if (activeItem.path.endsWith('.ipynb')) {
+                        // Preview notebook (notebooks don't support preview mode well, so skip)
+                        return;
+                    }
+
+                    // Preview as text document
+                    const document = await vscode.workspace.openTextDocument(uri);
+                    await vscode.window.showTextDocument(document, {
+                        preview: true,           // Opens in preview mode
+                        preserveFocus: true,     // Keeps focus on quick pick
+                        viewColumn: vscode.ViewColumn.Active
+                    });
+                } catch (error) {
+                    // Silently fail - file might not exist or be inaccessible
+                }
+            }
+        });
+    }
 
     quickPick.onDidAccept(async () => {
         const selected = quickPick.selectedItems[0];

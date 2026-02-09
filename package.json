@@ -124,6 +124,16 @@
           "type": "number",
           "default": 500,
           "description": "Delay in milliseconds before tracking active editor changes. When rapidly switching files, only the final file is tracked after this delay."
+        },
+        "jumper.previewOnSelection": {
+          "type": "boolean",
+          "default": false,
+          "description": "Preview files as you navigate through search results with arrow keys"
+        },
+        "jumper.openInNewTab": {
+          "type": "boolean",
+          "default": true,
+          "description": "Open files in new tabs instead of reusing the preview tab"
         }
       }
     }
