@@ -2,7 +2,7 @@
   "name": "jumper-vscode",
   "displayName": "Jumper for VSCode",
   "description": "Fast file and directory navigation with frecency algorithm. Quick jump to frequently and recently used files or directories. Fuzzy finder with smart ranking.",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "icon": "icon.png",
   "engines": {
     "vscode": "^1.75.0"
