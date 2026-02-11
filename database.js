@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const { exec } = require('child_process');
 const { promisify } = require('util');
-const minimatch = require('minimatch');
+const { minimatch } = require('minimatch');
 
 const execAsync = promisify(exec);
 
