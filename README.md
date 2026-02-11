@@ -4,7 +4,7 @@ Navigate to your most frequently and recently used files and directories instant
 
 ## Demo
 
-![Demo](demo.gif)
+![Demo](https://github.com/homerours/jumper.vscode/releases/download/0.1.3/demo.gif)
 
 ## Why Jumper?
 
