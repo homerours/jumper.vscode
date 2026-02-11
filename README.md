@@ -2,9 +2,9 @@
 
 Navigate to your most frequently and recently used files and directories instantly with [jumper](https://github.com/homerours/jumper)'s frecency algorithm.
 
-<!-- Add a demo GIF here:
+## Demo
+
 ![Demo](demo.gif)
--->
 
 ## Why Jumper?
 
