@@ -4,7 +4,6 @@ const { executeJumper, updateDatabase, getWeight } = require('./database');
 
 // Constants
 const MAX_FILES_IN_DIRECTORY = 1000;
-const EXCLUDE_PATTERNS = '**/node_modules/**';
 
 /**
  * Expand ~ to home directory if present
@@ -128,9 +127,16 @@ async function jumpToFile() {
  * Show quick pick for files in a directory
  */
 async function pickFileInDirectory(dirPath) {
+    // Get exclude patterns from configuration (already in glob format)
+    const config = vscode.workspace.getConfiguration('jumper');
+    const excludePatterns = config.get('excludePatterns', []);
+
+    // Join patterns with comma for VSCode's exclude format
+    const excludePattern = `{${excludePatterns.join(',')}}`;
+
     const files = await vscode.workspace.findFiles(
         new vscode.RelativePattern(dirPath, '**/*'),
-        EXCLUDE_PATTERNS,
+        excludePattern,
         MAX_FILES_IN_DIRECTORY
     );
 

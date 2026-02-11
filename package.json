@@ -102,23 +102,23 @@
         "jumper.excludePatterns": {
           "type": "array",
           "default": [
-            "/.git/",
-            "/node_modules/",
-            "/dist/",
-            "/build/",
-            "/out/",
-            "/.vscode/",
-            "/.idea/",
-            "/coverage/",
-            "/__pycache__/",
-            "/target/",
-            ".log",
-            ".tmp",
-            ".temp",
-            ".cache",
-            ".DS_Store"
+            "**/.git/**",
+            "**/node_modules/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/out/**",
+            "**/.vscode/**",
+            "**/.idea/**",
+            "**/coverage/**",
+            "**/__pycache__/**",
+            "**/target/**",
+            "**/*.log",
+            "**/*.tmp",
+            "**/*.temp",
+            "**/*.cache",
+            "**/.DS_Store"
           ],
-          "description": "File path patterns to exclude from jumper tracking. Paths containing any of these patterns will not be tracked."
+          "description": "Glob patterns to exclude from jumper tracking. Uses standard glob syntax (e.g., **/.git/**, **/node_modules/**)."
         },
         "jumper.debounceDelay": {
           "type": "number",
@@ -141,6 +141,9 @@
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint"
+  },
+  "dependencies": {
+    "minimatch": "^9.0.3"
   },
   "devDependencies": {
     "@types/vscode": "^1.75.0",

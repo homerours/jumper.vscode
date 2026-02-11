@@ -1,6 +1,7 @@
 const vscode = require('vscode');
 const { exec } = require('child_process');
 const { promisify } = require('util');
+const minimatch = require('minimatch');
 
 const execAsync = promisify(exec);
 
@@ -27,7 +28,8 @@ function shouldTrackFile(filePath) {
         return false;
     }
 
-    return !excludePatterns.some(pattern => filePath.includes(pattern));
+    // Check if file matches any exclude pattern using glob matching
+    return !excludePatterns.some(pattern => minimatch(filePath, pattern));
 }
 
 /**

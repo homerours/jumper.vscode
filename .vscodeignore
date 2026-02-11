@@ -1,6 +1,10 @@
 .vscode/**
 .vscode-test/**
-node_modules/**
 .gitignore
 .eslintrc.json
 *.vsix
+node_modules/**/test/**
+node_modules/**/tests/**
+node_modules/**/*.md
+node_modules/**/.*.yml
+node_modules/**/.*.yaml
