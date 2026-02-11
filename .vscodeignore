@@ -3,6 +3,7 @@
 .gitignore
 .eslintrc.json
 *.vsix
+.claude/**
 node_modules/**/test/**
 node_modules/**/tests/**
 node_modules/**/*.md
