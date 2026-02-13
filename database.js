@@ -1,7 +1,6 @@
 const vscode = require('vscode');
 const { exec } = require('child_process');
 const { promisify } = require('util');
-const { minimatch } = require('minimatch');
 
 const execAsync = promisify(exec);
 
@@ -11,25 +10,6 @@ const execAsync = promisify(exec);
 function getWeight(type) {
     const config = vscode.workspace.getConfiguration('jumper.weights');
     return config.get(type);
-}
-
-/**
- * Check if a file should be tracked in the jumper database
- */
-function shouldTrackFile(filePath) {
-    if (!filePath) return false;
-
-    // Get exclude patterns from configuration
-    const config = vscode.workspace.getConfiguration('jumper');
-    const excludePatterns = config.get('excludePatterns', []);
-
-    // Always exclude files with colons (temporary buffers)
-    if (filePath.includes(':')) {
-        return false;
-    }
-
-    // Check if file matches any exclude pattern using glob matching
-    return !excludePatterns.some(pattern => minimatch(filePath, pattern));
 }
 
 /**
@@ -49,11 +29,6 @@ async function checkJumperInstalled() {
  */
 async function updateDatabase(pathToUpdate, weight, type = 'files') {
     if (!pathToUpdate) return;
-
-    // Check if file should be tracked (excludes temp files, build dirs, etc)
-    if (type === 'files' && !shouldTrackFile(pathToUpdate)) {
-        return;
-    }
 
     try {
         await execAsync(`jumper update --type=${type} -w ${weight} "${pathToUpdate}"`);

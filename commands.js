@@ -127,9 +127,24 @@ async function jumpToFile() {
  * Show quick pick for files in a directory
  */
 async function pickFileInDirectory(dirPath) {
-    // Get exclude patterns from configuration (already in glob format)
-    const config = vscode.workspace.getConfiguration('jumper');
-    const excludePatterns = config.get('excludePatterns', []);
+    // Hardcoded exclude patterns
+    const excludePatterns = [
+        '**/.git/**',
+        '**/node_modules/**',
+        '**/dist/**',
+        '**/build/**',
+        '**/out/**',
+        '**/.vscode/**',
+        '**/.idea/**',
+        '**/coverage/**',
+        '**/__pycache__/**',
+        '**/target/**',
+        '**/*.log',
+        '**/*.tmp',
+        '**/*.temp',
+        '**/*.cache',
+        '**/.DS_Store'
+    ];
 
     // Join patterns with comma for VSCode's exclude format
     const excludePattern = `{${excludePatterns.join(',')}}`;

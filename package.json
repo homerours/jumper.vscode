@@ -99,27 +99,6 @@
           "default": 0.3,
           "description": "Weight for switching to a file in the editor"
         },
-        "jumper.excludePatterns": {
-          "type": "array",
-          "default": [
-            "**/.git/**",
-            "**/node_modules/**",
-            "**/dist/**",
-            "**/build/**",
-            "**/out/**",
-            "**/.vscode/**",
-            "**/.idea/**",
-            "**/coverage/**",
-            "**/__pycache__/**",
-            "**/target/**",
-            "**/*.log",
-            "**/*.tmp",
-            "**/*.temp",
-            "**/*.cache",
-            "**/.DS_Store"
-          ],
-          "description": "Glob patterns to exclude from jumper tracking. Uses standard glob syntax (e.g., **/.git/**, **/node_modules/**)."
-        },
         "jumper.debounceDelay": {
           "type": "number",
           "default": 500,
@@ -142,9 +121,7 @@
     "lint": "eslint .",
     "pretest": "npm run lint"
   },
-  "dependencies": {
-    "minimatch": "^9.0.3"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/vscode": "^1.75.0",
     "@types/node": "16.x",
