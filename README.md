@@ -125,7 +125,6 @@ Configure jumper's behavior in VSCode settings:
 | `jumper.homeTilde` | `true` | Show `~/path` instead of `/home/user/path` |
 | `jumper.relative` | `false` | Show relative paths instead of absolute |
 | `jumper.beta` | `1.0` | Ranking algorithm parameter |
-| `jumper.excludePatterns` | `[...]` | File path patterns to exclude from tracking (e.g., `/.git/`, `/node_modules/`) |
 | `jumper.debounceDelay` | `500` | Delay in ms before tracking active editor changes |
 | `jumper.previewOnSelection` | `false` | Preview files as you navigate through search results |
 | `jumper.openInNewTab` | `true` | Open files in new tabs instead of reusing preview tab |
